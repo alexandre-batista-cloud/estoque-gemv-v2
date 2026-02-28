@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.development
+.env.production
+.env.development.local
+.env.production.local
+backend/db/homolog.db
+.DS_Store
