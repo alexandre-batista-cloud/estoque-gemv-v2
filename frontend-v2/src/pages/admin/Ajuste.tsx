@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select'
+import { CheckCircle2 } from 'lucide-react'
 
 export function AdminAjuste() {
   const { user } = useAuth()
@@ -57,12 +58,13 @@ export function AdminAjuste() {
     ?.find(e => e.local_id === localId)?.quantidade
 
   return (
-    <div className="max-w-md">
-      <h2 className="text-xl font-bold mb-6">Ajuste de Estoque</h2>
-      <div className="space-y-4">
+    <div className="max-w-md w-full">
+      <h2 className="text-xl font-bold mb-6 text-slate-900">Ajuste de Estoque</h2>
+
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div>
-          <label className="text-sm font-medium">Produto</label>
-          <Select onValueChange={setProdutoId}>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Produto</label>
+          <Select onValueChange={setProdutoId} value={produtoId}>
             <SelectTrigger>
               <SelectValue placeholder="Selecionar produto" />
             </SelectTrigger>
@@ -77,8 +79,8 @@ export function AdminAjuste() {
         </div>
 
         <div>
-          <label className="text-sm font-medium">Local</label>
-          <Select onValueChange={setLocalId}>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Local</label>
+          <Select onValueChange={setLocalId} value={localId}>
             <SelectTrigger>
               <SelectValue placeholder="Selecionar local" />
             </SelectTrigger>
@@ -91,27 +93,45 @@ export function AdminAjuste() {
         </div>
 
         {qtdAtual !== undefined && (
-          <p className="text-sm text-gray-500">Quantidade atual: <strong>{qtdAtual}</strong></p>
+          <div className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600">
+            Quantidade atual:
+            <span className="font-bold text-slate-900">{qtdAtual}</span>
+          </div>
         )}
 
         <div>
-          <label className="text-sm font-medium">Nova quantidade</label>
-          <Input type="number" min={0} value={novaQtd}
-            onChange={e => setNovaQtd(e.target.value)} />
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Nova quantidade</label>
+          <Input
+            type="number"
+            min={0}
+            value={novaQtd}
+            onChange={e => setNovaQtd(e.target.value)}
+            placeholder="0"
+          />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Observação (obrigatória)</label>
-          <Input value={obs} onChange={e => setObs(e.target.value)}
-            placeholder="Ex: Contagem física 28/02/2026" />
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Observação <span className="text-slate-400 font-normal">(obrigatória)</span>
+          </label>
+          <Input
+            value={obs}
+            onChange={e => setObs(e.target.value)}
+            placeholder="Ex: Contagem física 01/03/2026"
+          />
         </div>
 
-        {success && <p className="text-green-600 text-sm">✅ Ajuste salvo com sucesso</p>}
+        {success && (
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5 text-sm text-emerald-700">
+            <CheckCircle2 size={16} />
+            Ajuste salvo com sucesso
+          </div>
+        )}
 
         <Button
           onClick={() => mutation.mutate()}
           disabled={!produtoId || !localId || !novaQtd || !obs || mutation.isPending}
-          className="w-full"
+          className="w-full min-h-[44px]"
         >
           {mutation.isPending ? 'Salvando...' : 'Salvar Ajuste'}
         </Button>

@@ -18,7 +18,6 @@ export function useProdutos(search?: string) {
         `)
         .eq('ativo', true)
         .order('nome')
-        .limit(100)
 
       if (search && search.trim().length > 1) {
         query = query.textSearch('search_vector', search.trim(), {
