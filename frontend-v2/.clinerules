@@ -1,0 +1,49 @@
+# Estoque Ortobom v2 — Cline Context
+
+## Stack
+- React 18 + Vite + TypeScript strict
+- Tailwind CSS v4 (@import "tailwindcss" — sem config file)
+- shadcn/ui em src/components/ui/
+- TanStack Query v5 + React Hook Form + Zod
+- Supabase JS v2 (src/lib/supabase.ts)
+- React Router v6 (src/App.tsx)
+- Lucide React icons
+
+## Layouts
+- Admin: AdminLayout.tsx → sidebar blue-900, h-dvh flex-col
+- Vendas: VendasLayout.tsx → topbar blue-900, h-dvh flex-col
+- Footer fixo: "© 2026 Gemv Colchões — Todos os direitos reservados"
+
+## Padrões obrigatórios
+- Export nomeado: export function NomeComponente()
+- Sem default exports, sem any, sem inline styles
+- TanStack Query para TODOS os fetches Supabase
+- Tabelas com min-w-[Npx] + overflow-x-auto no wrapper
+- Paginação: componente Pagination de src/components/ui/Pagination.tsx
+- Build limpo: npm run build deve passar sem erros TS
+
+## Tabelas Supabase
+- locais, produtos, estoque_por_local, movimentacoes, reservas
+
+## Mapeamento CSV → localidades (CRÍTICO)
+O campo "LOCALIZADO" mapeia EXCLUSIVAMENTE assim:
+- "loja anapolis"    → tipo='loja'    AND nome ILIKE '%anáp%'
+- "loja goiania"     → tipo='loja'    AND nome ILIKE '%goiân%'
+- "estoque anapolis" → tipo='estoque' AND nome ILIKE '%anáp%'
+- "estoque goiania"  → tipo='estoque' AND nome ILIKE '%goiân%'
+NUNCA inserir o mesmo produto em dois locais por uma única linha CSV.
+SEMPRE usar UPSERT (ON CONFLICT DO UPDATE) em estoque_por_local.
+
+## Playwright MCP
+  - Disponível para testes visuais no browser
+  - Comando: npx @playwright/mcp@latest
+  - Browser: chromium
+  - Cache: D:/Economia_AIOS/.cache/
+  - Snapshots: sempre salvar em
+  D:/Economia_AIOS/.cache/playwright_browser_snapshot/{nome}.md usando param
+  filename
+  - Dev server: http://localhost:5173 (frontend-v2 admin)
+  - Login admin: batista.alexandre.cloud@gmail.com / Ortobom2026
+  - Dev server: http://localhost:5173 (frontend-v2 vendedor)
+  - Login admin: vendedor@ortobom.com / Ortobom2026
+  

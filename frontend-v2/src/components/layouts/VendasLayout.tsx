@@ -1,45 +1,79 @@
 import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { Search, BookmarkCheck, LogOut } from 'lucide-react'
+import { Search, BookmarkCheck, LogOut, Gem } from 'lucide-react'
 import { cn } from '../../lib/utils'
+
+const navItems = [
+  { to: '/vendas/busca',    label: 'Buscar',   icon: Search },
+  { to: '/vendas/reservas', label: 'Reservas', icon: BookmarkCheck },
+]
 
 export function VendasLayout() {
   const location = useLocation()
   const { signOut, user } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <h1 className="font-bold text-lg">💎 Estoque Ortobom</h1>
-          <nav className="flex gap-4">
-            {[
-              { to: '/vendas/busca',    label: 'Buscar',    icon: Search },
-              { to: '/vendas/reservas', label: 'Reservas',  icon: BookmarkCheck },
-            ].map(({ to, label, icon: Icon }) => (
-              <Link key={to} to={to}
-                className={cn(
-                  "flex items-center gap-1 text-sm px-3 py-1 rounded transition-colors",
-                  location.pathname === to
-                    ? "bg-blue-50 text-blue-700 font-medium"
-                    : "text-gray-600 hover:bg-gray-100"
-                )}>
-                <Icon size={14} /> {label}
-              </Link>
-            ))}
-          </nav>
+    <div className="flex flex-col h-dvh bg-slate-50">
+      <header className="bg-blue-900 h-14 px-4 flex items-center justify-between flex-shrink-0 z-30 shadow-md">
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+          <Gem size={16} className="text-blue-300 flex-shrink-0" />
+          <div>
+            <p className="font-bold text-white text-sm leading-tight">Dash Ortobom</p>
+            <p className="text-blue-300 text-[10px] leading-tight">Bem vindo ao Dash</p>
+            <p className="text-blue-400 text-[10px] leading-tight">Estoque v2</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-400">{user?.email}</span>
-          <button onClick={() => signOut()}
-            className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-500">
-            <LogOut size={14} /> Sair
+
+        {/* Nav */}
+        <nav className="flex gap-1">
+          {navItems.map(({ to, label, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className={cn(
+                'flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg font-medium transition-colors',
+                location.pathname === to
+                  ? 'bg-blue-500 text-white'
+                  : 'text-blue-200 hover:bg-blue-800 hover:text-white',
+              )}
+            >
+              <Icon size={14} className="flex-shrink-0" />
+              <span className="hidden sm:inline">{label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        {/* User */}
+        <div className="flex items-center gap-2">
+          <span className="hidden md:block text-xs text-blue-300 truncate max-w-36">
+            {user?.email}
+          </span>
+          <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+            <span className="text-xs font-bold text-white uppercase">
+              {user?.email?.[0] ?? 'U'}
+            </span>
+          </div>
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-1 text-xs text-blue-300 hover:text-red-400 transition-colors p-1.5 rounded-md hover:bg-blue-800"
+            aria-label="Sair"
+          >
+            <LogOut size={14} />
+            <span className="hidden sm:inline">Sair</span>
           </button>
         </div>
       </header>
-      <main className="p-6">
-        <Outlet />
-      </main>
+
+<main className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-900 hover:scrollbar-thumb-blue-400">
+  <div className="p-4 pb-6 sm:p-6 sm:pb-8 w-full min-h-[calc(100vh-8rem)]">
+    <Outlet />
+  </div>
+</main>
+
+      <footer className="flex-shrink-0 h-8 border-t border-slate-200 flex items-center justify-center bg-slate-50">
+        <p className="text-[11px] text-slate-400">© 2026 Gemv Colchões — Todos os direitos reservados</p>
+      </footer>
     </div>
   )
 }
