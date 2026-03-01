@@ -71,8 +71,15 @@ export function VendasLayout() {
   </div>
 </main>
 
-      <footer className="flex-shrink-0 h-8 border-t border-slate-200 flex items-center justify-center bg-slate-50">
+      <footer className="flex-shrink-0 h-8 border-t border-slate-200 flex items-center justify-between px-4 bg-slate-50">
         <p className="text-[11px] text-slate-400">© 2026 Gemv Colchões — Todos os direitos reservados</p>
+        <button
+          onClick={() => signOut()}
+          className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-red-400 transition-colors"
+        >
+          <LogOut size={10} />
+          Sair
+        </button>
       </footer>
     </div>
   )
