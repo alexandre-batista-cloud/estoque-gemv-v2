@@ -1,11 +1,17 @@
 // Script: rodar migrations no Supabase via conexão direta
-// Uso: node run-migrations.js
+// Uso: SUPABASE_SERVICE_ROLE=<sua_chave> node run-migrations.js
+require('dotenv').config();
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
 const PROJECT_REF = 'kbzerulcczyakjqwigxs';
-const SERVICE_ROLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiemVydWxjY3p5YWtqcXdpZ3hzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDkyMjE0OSwiZXhwIjoyMDg2NDk4MTQ5fQ.PB8RZqFTpc9w_1aY9PY7Ebi-jmMMaQ2wIrvgEkT1Djc';
+const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+
+if (!SERVICE_ROLE) {
+  console.error('❌ SUPABASE_SERVICE_ROLE não definida. Adicione no .env ou passe como variável de ambiente.');
+  process.exit(1);
+}
 
 // Tenta conexão via Supabase Supavisor (JWT auth)
 const connectionString =
