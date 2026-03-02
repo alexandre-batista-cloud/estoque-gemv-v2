@@ -1,14 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Gem, LogIn } from 'lucide-react'
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_CF_TURNSTILE_SITE_KEY as string
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, params: Record<string, unknown>) => string
+      reset: (widgetId: string) => void
+      remove: (widgetId: string) => void
+    }
+  }
+}
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const widgetIdRef = useRef<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const { user, role } = useAuth()
 
@@ -18,8 +33,52 @@ export function LoginPage() {
     }
   }, [user, role, navigate])
 
+  const renderWidget = useCallback(() => {
+    if (!containerRef.current || !window.turnstile) return
+    if (widgetIdRef.current) return // already rendered
+
+    widgetIdRef.current = window.turnstile.render(containerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: (token: string) => setTurnstileToken(token),
+      'expired-callback': () => setTurnstileToken(''),
+      'error-callback': () => setTurnstileToken(''),
+    })
+  }, [])
+
+  useEffect(() => {
+    if (document.getElementById('cf-turnstile-script')) {
+      // Script already added — try to render immediately if API ready
+      if (window.turnstile) renderWidget()
+      return
+    }
+
+    const script = document.createElement('script')
+    script.id = 'cf-turnstile-script'
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    script.async = true
+    script.defer = true
+    script.onload = renderWidget
+    document.head.appendChild(script)
+  }, [renderWidget])
+
+  // Render widget once the ref is attached
+  useEffect(() => {
+    if (window.turnstile && containerRef.current) renderWidget()
+  }, [renderWidget])
+
+  const resetTurnstile = () => {
+    if (widgetIdRef.current && window.turnstile) {
+      window.turnstile.reset(widgetIdRef.current)
+    }
+    setTurnstileToken('')
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!turnstileToken) {
+      setError('Complete a verificação de segurança')
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -28,6 +87,7 @@ export function LoginPage() {
     if (error) {
       setError('Email ou senha incorretos')
       setLoading(false)
+      resetTurnstile()
     } else {
       const userRole = data.user?.user_metadata?.role
       navigate(userRole === 'superadmin' ? '/admin/dashboard' : '/vendas/busca', { replace: true })
@@ -77,6 +137,9 @@ export function LoginPage() {
               />
             </div>
 
+            {/* Cloudflare Turnstile */}
+            <div className="flex justify-center" ref={containerRef} />
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5">
                 <p className="text-red-600 text-sm">{error}</p>
@@ -85,7 +148,7 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !turnstileToken}
               className="w-full flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm mt-2"
             >
               {loading ? (
